@@ -1,0 +1,227 @@
+/**
+ * @file channel.js
+ * @description Logic for the channel page, including video player setup,
+ * chat functionality (mock or WebSocket), and follow button state.
+ */
+
+import { API } from './modules/api.js';
+import { DOM, get$ } from './modules/dom.js';
+import { LocalStorage } from './modules/storage.js';
+import { ThemeManager } from './modules/theme.js';
+import { Chat } from './modules/chat.js';
+import { ANALYTICS } from './modules/analytics.js';
+
+// --- STATE ---
+const state = {
+    channel: null,
+    stream: null,
+    isFollowing: false,
+    chatClient: null,
+};
+
+// --- DOM ELEMENTS ---
+const elements = {
+    videoPlayer: get$('#video-player'),
+    videoContainer: get$('#video-container'),
+    videoOverlay: get$('#video-overlay'),
+    videoOverlayText: get$('#video-overlay-text'),
+    streamTitle: get$('#stream-title'),
+    streamAvatar: get$('#stream-avatar'),
+    streamChannelName: get$('#stream-channel-name'),
+    streamCategoryLink: get$('#stream-category-link'),
+    viewerCount: get$('#viewer-count'),
+    followButton: get$('#follow-button'),
+    followButtonText: get$('#follow-button-text'),
+    chatMessages: get$('#chat-messages'),
+    chatInput: get$('#chat-input'),
+    sendChatButton: get$('#send-chat-button'),
+};
+
+// --- RENDER FUNCTIONS ---
+
+/**
+ * Renders the main stream and channel information.
+ */
+function renderStreamInfo() {
+    if (!state.channel || !state.stream) return;
+    
+    document.title = `${state.channel.displayName} - Streamify`;
+    DOM.set(elements.streamTitle, { textContent: state.stream.title });
+    DOM.set(elements.streamAvatar, { src: state.channel.avatarUrl, alt: `${state.channel.displayName} avatar` });
+    DOM.set(elements.streamChannelName, { textContent: state.channel.displayName });
+    DOM.set(elements.viewerCount, { textContent: state.stream.viewers.toLocaleString() });
+    
+    // Find category name
+    API.fetchData().then(data => {
+        const category = data.categories.find(c => c.id === state.stream.categoryId);
+        if (category) {
+            DOM.set(elements.streamCategoryLink, { textContent: category.name, href: `/?category=${category.slug}` });
+        }
+    });
+
+    updateFollowButton();
+}
+
+// --- VIDEO PLAYER LOGIC ---
+
+/**
+ * Initializes the video player with HLS.js fallback.
+ */
+function initPlayer() {
+    const videoSrc = state.stream.videoSources;
+    if (!videoSrc) {
+        showVideoOverlay("Video source not found.");
+        return;
+    }
+    
+    const hlsSrc = videoSrc.hls;
+    const mp4Src = videoSrc.mp4;
+
+    // HLS.js for HLS streams
+    if (hlsSrc && Hls.isSupported()) {
+        const hls = new Hls();
+        hls.loadSource(hlsSrc);
+        hls.attachMedia(elements.videoPlayer);
+        hls.on(Hls.Events.MANIFEST_PARSED, () => {
+            elements.videoPlayer.play().catch(e => console.error("Autoplay was blocked:", e));
+        });
+        hls.on(Hls.Events.ERROR, (event, data) => {
+            if (data.fatal) {
+                console.error('HLS.js fatal error:', data);
+                showVideoOverlay("Stream failed to load. It might be offline.");
+            }
+        });
+    } 
+    // Native HLS support (Safari) or MP4 fallback
+    else if (elements.videoPlayer.canPlayType('application/vnd.apple.mpegurl')) {
+        elements.videoPlayer.src = hlsSrc;
+        elements.videoPlayer.addEventListener('loadedmetadata', () => {
+            elements.videoPlayer.play().catch(e => console.error("Autoplay was blocked:", e));
+        });
+    } 
+    else if (mp4Src) {
+        elements.videoPlayer.src = mp4Src;
+        elements.videoPlayer.play().catch(e => console.error("Autoplay was blocked:", e));
+    } else {
+        showVideoOverlay("Video format not supported.");
+    }
+
+    elements.videoPlayer.addEventListener('error', () => {
+        showVideoOverlay("The stream is offline or could not be loaded.");
+    });
+}
+
+/**
+ * Shows a message over the video player.
+ * @param {string} message - The message to display.
+ */
+function showVideoOverlay(message) {
+    elements.videoOverlayText.textContent = message;
+    elements.videoOverlay.hidden = false;
+}
+
+// --- FOLLOW LOGIC ---
+
+/**
+ * Updates the follow button's appearance based on follow state.
+ */
+function updateFollowButton() {
+    const icon = state.isFollowing ? 'heart-filled' : 'heart';
+    elements.followButton.innerHTML = `<i data-feather="${icon}" class="btn__icon"></i> <span id="follow-button-text">${state.isFollowing ? 'Unfollow' : 'Follow'}</span>`;
+    if (state.isFollowing) {
+        elements.followButton.querySelector('i svg').style.fill = 'currentColor';
+    }
+    feather.replace();
+}
+
+/**
+ * Handles clicks on the follow button.
+ */
+function handleFollowClick() {
+    let followed = LocalStorage.get('followed_channels', []);
+    const slug = state.channel.slug;
+
+    if (state.isFollowing) {
+        followed = followed.filter(f => f !== slug);
+        ANALYTICS.log('unfollow_channel', { channel: slug });
+    } else {
+        if (!followed.includes(slug)) {
+            followed.push(slug);
+        }
+        ANALYTICS.log('follow_channel', { channel: slug });
+    }
+
+    state.isFollowing = !state.isFollowing;
+    LocalStorage.set('followed_channels', followed);
+    updateFollowButton();
+    
+    // Dispatch a custom event so the homepage sidebar can update in real-time if open
+    window.dispatchEvent(new CustomEvent('followUpdate', { detail: { followed }}));
+}
+
+// --- INITIALIZATION ---
+
+/**
+ * Initializes the channel page.
+ */
+async function init() {
+    ThemeManager.init();
+
+    // Get channel slug from URL
+    const urlParams = new URLSearchParams(window.location.search);
+    const channelSlug = urlParams.get('id');
+
+    if (!channelSlug) {
+        showVideoOverlay("No channel specified.");
+        return;
+    }
+    
+    // Fetch all data
+    const data = await API.fetchData();
+    if (!data) {
+        showVideoOverlay("Could not load channel data.");
+        return;
+    }
+
+    // Find the correct channel and stream
+    state.channel = data.channels.find(c => c.slug === channelSlug);
+    if (!state.channel) {
+        showVideoOverlay("Channel not found.");
+        return;
+    }
+    state.stream = data.streams.find(s => s.channelId === state.channel.id && s.isLive);
+     if (!state.stream) {
+        showVideoOverlay("This channel is currently offline.");
+        // Still render some info
+        document.title = `${state.channel.displayName} - Offline`;
+        DOM.set(elements.streamTitle, { textContent: "Offline" });
+        DOM.set(elements.streamAvatar, { src: state.channel.avatarUrl });
+        DOM.set(elements.streamChannelName, { textContent: state.channel.displayName });
+        return;
+    }
+
+    // Check follow status
+    const followedChannels = LocalStorage.get('followed_channels', []);
+    state.isFollowing = followedChannels.includes(channelSlug);
+    
+    // Render UI
+    renderStreamInfo();
+    initPlayer();
+
+    // Initialize chat
+    state.chatClient = new Chat({
+        mode: 'mock', // or 'websocket'
+        messageContainer: elements.chatMessages,
+        chatInput: elements.chatInput,
+        sendButton: elements.sendChatButton,
+        channelId: state.channel.id
+    });
+    state.chatClient.connect();
+
+    // Add event listeners
+    elements.followButton.addEventListener('click', handleFollowClick);
+    
+    ANALYTICS.log('page_view', { page: 'channel', channel: channelSlug });
+}
+
+document.addEventListener('DOMContentLoaded', init);
