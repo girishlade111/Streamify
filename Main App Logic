@@ -1,0 +1,256 @@
+/**
+ * @file app.js
+ * @description Main application logic for the homepage, including data fetching,
+ * rendering, search/filter functionality, and theme management.
+ */
+
+// --- MODULES ---
+import { API } from './modules/api.js';
+import { DOM, get$, get$$ } from './modules/dom.js';
+import { LocalStorage } from './modules/storage.js';
+import { ThemeManager } from './modules/theme.js';
+import { debounce } from './modules/utils.js';
+import { ANALYTICS } from './modules/analytics.js';
+
+// --- STATE ---
+const state = {
+    streams: [],
+    channels: [],
+    categories: [],
+    followedChannels: new Set(),
+    currentFilter: {
+        category: 'all',
+        searchTerm: ''
+    }
+};
+
+// --- DOM ELEMENTS ---
+const elements = {
+    streamGrid: get$('#stream-grid'),
+    streamCardTemplate: get$('#stream-card-template'),
+    categoryChipsContainer: get$('#category-chips-container'),
+    searchInput: get$('#search-input'),
+    noResultsMessage: get$('#no-results-message'),
+    followedChannelsList: get$('#followed-channels-list'),
+    followedChannelTemplate: get$('#followed-channel-template'),
+    followedChannelOfflineTemplate: get$('#followed-channel-offline-template')
+};
+
+// --- RENDER FUNCTIONS ---
+
+/**
+ * Renders the category filter chips.
+ */
+function renderCategories() {
+    const fragment = document.createDocumentFragment();
+    
+    // Add "All" category first
+    const allChip = DOM.create('button', { class: 'chip active', textContent: 'All', 'data-category-slug': 'all' });
+    fragment.appendChild(allChip);
+
+    state.categories.forEach(category => {
+        const chip = DOM.create('button', { class: 'chip', textContent: category.name, 'data-category-slug': category.slug });
+        fragment.appendChild(chip);
+    });
+    
+    elements.categoryChipsContainer.innerHTML = '';
+    elements.categoryChipsContainer.appendChild(fragment);
+}
+
+/**
+ * Renders a list of stream cards based on current filters.
+ * @param {Array} streamsToRender - The array of stream objects to render.
+ */
+function renderStreams(streamsToRender) {
+    const fragment = document.createDocumentFragment();
+    
+    if (streamsToRender.length === 0) {
+        elements.noResultsMessage.hidden = false;
+        elements.streamGrid.innerHTML = '';
+        return;
+    }
+
+    elements.noResultsMessage.hidden = true;
+
+    streamsToRender.forEach(stream => {
+        const cardClone = elements.streamCardTemplate.content.cloneNode(true);
+        const card = cardClone.querySelector('.card');
+        const channel = state.channels.find(c => c.id === stream.channelId);
+        const category = state.categories.find(c => c.id === stream.categoryId);
+
+        if (!channel || !category) return;
+
+        card.href = `channel.html?id=${channel.slug}`;
+        DOM.set(card, '.card__thumbnail', { src: stream.thumbnailUrl, alt: stream.title });
+        DOM.set(card, '.card__viewers-count', { textContent: stream.viewers.toLocaleString() });
+        DOM.set(card, '.card__avatar', { src: channel.avatarUrl, alt: channel.displayName });
+        DOM.set(card, '.card__title', { textContent: stream.title });
+        DOM.set(card, '.card__channel', { textContent: channel.displayName });
+        DOM.set(card, '.card__category', { textContent: category.name });
+
+        fragment.appendChild(cardClone);
+    });
+
+    elements.streamGrid.innerHTML = '';
+    elements.streamGrid.appendChild(fragment);
+    feather.replace(); // Re-initialize Feather icons
+}
+
+/**
+ * Renders the list of followed channels in the sidebar.
+ */
+function renderFollowedChannels() {
+    elements.followedChannelsList.innerHTML = ''; // Clear existing list
+    const followedLive = [];
+    const followedOffline = [];
+
+    state.followedChannels.forEach(slug => {
+        const channel = state.channels.find(c => c.slug === slug);
+        if (!channel) return;
+        
+        const liveStream = state.streams.find(s => s.channelId === channel.id && s.isLive);
+        if (liveStream) {
+            followedLive.push({channel, stream: liveStream});
+        } else {
+            followedOffline.push({channel});
+        }
+    });
+    
+    if (followedLive.length === 0 && followedOffline.length === 0) {
+        elements.followedChannelsList.innerHTML = `
+            <div class="sidebar__empty-state">
+                <i data-feather="heart"></i>
+                <p>Follow channels to see them here!</p>
+            </div>`;
+        feather.replace();
+        return;
+    }
+
+    const fragment = document.createDocumentFragment();
+
+    followedLive.forEach(({channel, stream}) => {
+        const template = elements.followedChannelTemplate.content.cloneNode(true);
+        const link = template.querySelector('.sidebar-link');
+        link.href = `channel.html?id=${channel.slug}`;
+        DOM.set(link, '.sidebar-link__avatar', { src: channel.avatarUrl, alt: '' });
+        DOM.set(link, '.sidebar-link__name', { textContent: channel.displayName });
+        DOM.set(link, '.sidebar-link__viewers', { textContent: stream.viewers.toLocaleString() });
+        fragment.appendChild(template);
+    });
+
+     followedOffline.forEach(({channel}) => {
+        const template = elements.followedChannelOfflineTemplate.content.cloneNode(true);
+        const link = template.querySelector('.sidebar-link');
+        link.href = `channel.html?id=${channel.slug}`;
+        DOM.set(link, '.sidebar-link__avatar', { src: channel.avatarUrl, alt: '' });
+        DOM.set(link, '.sidebar-link__name', { textContent: channel.displayName });
+        fragment.appendChild(template);
+    });
+    
+    elements.followedChannelsList.appendChild(fragment);
+    feather.replace();
+}
+
+// --- LOGIC & EVENT HANDLERS ---
+
+/**
+ * Applies current filters (category and search term) to the streams list.
+ */
+function applyFiltersAndRender() {
+    let filteredStreams = [...state.streams];
+
+    // Filter by category
+    if (state.currentFilter.category !== 'all') {
+        const categoryId = state.categories.find(c => c.slug === state.currentFilter.category)?.id;
+        if (categoryId) {
+            filteredStreams = filteredStreams.filter(s => s.categoryId === categoryId);
+        }
+    }
+
+    // Filter by search term (case-insensitive)
+    const searchTerm = state.currentFilter.searchTerm.toLowerCase();
+    if (searchTerm) {
+        filteredStreams = filteredStreams.filter(stream => {
+            const channel = state.channels.find(c => c.id === stream.channelId);
+            const category = state.categories.find(c => c.id === stream.categoryId);
+            return stream.title.toLowerCase().includes(searchTerm) ||
+                   channel?.displayName.toLowerCase().includes(searchTerm) ||
+                   category?.name.toLowerCase().includes(searchTerm);
+        });
+    }
+
+    renderStreams(filteredStreams);
+}
+
+/**
+ * Handles clicks on category chips.
+ * @param {Event} e - The click event.
+ */
+function handleCategoryClick(e) {
+    const chip = e.target.closest('.chip');
+    if (!chip) return;
+
+    const categorySlug = chip.dataset.categorySlug;
+    state.currentFilter.category = categorySlug;
+
+    // Update active state on chips
+    get$$('.chip', elements.categoryChipsContainer).forEach(c => c.classList.remove('active'));
+    chip.classList.add('active');
+    
+    ANALYTICS.log('filter_category', { category: categorySlug });
+    applyFiltersAndRender();
+}
+
+/**
+ * Handles search input. Debounced for performance.
+ * @param {Event} e - The input event.
+ */
+const handleSearchInput = debounce((e) => {
+    state.currentFilter.searchTerm = e.target.value;
+    ANALYTICS.log('search', { query: e.target.value });
+    applyFiltersAndRender();
+}, 300);
+
+/**
+ * Initializes the application.
+ */
+async function init() {
+    // 1. Initialize theme
+    ThemeManager.init();
+
+    // 2. Load data
+    const data = await API.fetchData();
+    if (!data) {
+        elements.streamGrid.innerHTML = '<p class="error">Could not load data. Please try again later.</p>';
+        return;
+    }
+    state.streams = data.streams.filter(s => s.isLive); // Only show live streams on homepage
+    state.channels = data.channels;
+    state.categories = data.categories;
+    
+    // 3. Load followed channels from local storage
+    state.followedChannels = new Set(LocalStorage.get('followed_channels', []));
+
+    // 4. Render initial UI
+    renderCategories();
+    renderFollowedChannels();
+    applyFiltersAndRender();
+
+    // 5. Set up event listeners
+    elements.categoryChipsContainer.addEventListener('click', handleCategoryClick);
+    elements.searchInput.addEventListener('input', handleSearchInput);
+    
+    // Custom event listener for when follows change on channel page
+    window.addEventListener('followUpdate', (e) => {
+        state.followedChannels = new Set(e.detail.followed);
+        renderFollowedChannels();
+    });
+
+    // 6. Replace icons
+    feather.replace();
+    
+    ANALYTICS.log('page_view', { page: 'homepage' });
+}
+
+// --- INITIALIZATION ---
+document.addEventListener('DOMContentLoaded', init);
