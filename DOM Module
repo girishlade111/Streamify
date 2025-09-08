@@ -1,0 +1,63 @@
+/**
+ * @file dom.js
+ * @description A collection of utility functions for DOM manipulation.
+ */
+
+/**
+ * A shorthand for document.querySelector.
+ * @param {string} selector - The CSS selector to search for.
+ * @param {Element} [scope=document] - The element to search within.
+ * @returns {Element|null} The first matching element or null.
+ */
+export function get$(selector, scope = document) {
+    return scope.querySelector(selector);
+}
+
+/**
+ * A shorthand for document.querySelectorAll.
+ * @param {string} selector - The CSS selector to search for.
+ * @param {Element} [scope=document] - The element to search within.
+ * @returns {NodeListOf<Element>} A NodeList of matching elements.
+ */
+export function get$$(selector, scope = document) {
+    return scope.querySelectorAll(selector);
+}
+
+/**
+ * A helper to create a DOM element with specified attributes and content.
+ * @param {string} tagName - The tag name of the element to create.
+ * @param {Object} [attributes={}] - An object of attributes to set on the element.
+ * @returns {HTMLElement} The created element.
+ */
+export function create(tagName, attributes = {}) {
+    const element = document.createElement(tagName);
+    for (const [key, value] of Object.entries(attributes)) {
+        if (key === 'textContent') {
+            element.textContent = value;
+        } else {
+            element.setAttribute(key, value);
+        }
+    }
+    return element;
+}
+
+/**
+ * A helper to update a DOM element found within a scope.
+ * @param {Element} scope - The parent element to search within.
+ * @param {string} selector - The CSS selector for the target element.
+ * @param {Object} attributes - An object of attributes to set. `textContent` is a special key.
+ */
+export function set(scope, selector, attributes) {
+    const element = get$(selector, scope);
+    if (!element) return;
+    for (const [key, value] of Object.entries(attributes)) {
+         if (key === 'textContent') {
+            element.textContent = value;
+        } else {
+            element.setAttribute(key, value);
+        }
+    }
+}
+
+
+export const DOM = { create, set };
