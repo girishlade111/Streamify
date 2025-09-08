@@ -1,0 +1,103 @@
+{
+  "categories": [
+    { "id": "cat-1", "slug": "just-chatting", "name": "Just Chatting", "thumbnailUrl": "assets/placeholders/category-1.jpg" },
+    { "id": "cat-2", "slug": "fortnite", "name": "Fortnite", "thumbnailUrl": "assets/placeholders/category-2.jpg" },
+    { "id": "cat-3", "slug": "music", "name": "Music", "thumbnailUrl": "assets/placeholders/category-3.jpg" },
+    { "id": "cat-4", "slug": "art", "name": "Art & Creative", "thumbnailUrl": "assets/placeholders/category-4.jpg" },
+    { "id": "cat-5", "slug": "valorant", "name": "VALORANT", "thumbnailUrl": "assets/placeholders/category-5.jpg" },
+    { "id": "cat-6", "slug": "coding", "name": "Software & Game Dev", "thumbnailUrl": "assets/placeholders/category-6.jpg" }
+  ],
+  "channels": [
+    { "id": "chan-1", "slug": "pixel-pioneer", "displayName": "PixelPioneer", "avatarUrl": "assets/placeholders/avatar-1.png" },
+    { "id": "chan-2", "slug": "synth-rider", "displayName": "SynthRider", "avatarUrl": "assets/placeholders/avatar-2.png" },
+    { "id": "chan-3", "slug": "code-crafter", "displayName": "CodeCrafter", "avatarUrl": "assets/placeholders/avatar-3.png" },
+    { "id": "chan-4", "slug": "artistic-ally", "displayName": "ArtisticAlly", "avatarUrl": "assets/placeholders/avatar-4.png" },
+    { "id": "chan-5", "slug": "captain-valor", "displayName": "CaptainValor", "avatarUrl": "assets/placeholders/avatar-5.png" },
+    { "id": "chan-6", "slug": "casual-quest", "displayName": "CasualQuest", "avatarUrl": "assets/placeholders/avatar-6.png" },
+    { "id": "chan-7", "slug": "speed-demon", "displayName": "SpeedDemon", "avatarUrl": "assets/placeholders/avatar-7.png" }
+  ],
+  "streams": [
+    {
+      "id": "stream-1",
+      "channelId": "chan-1",
+      "isLive": true,
+      "title": "Exploring the world of Cyberpunk 2077!",
+      "categoryId": "cat-2",
+      "viewers": 12567,
+      "thumbnailUrl": "assets/placeholders/stream-1.jpg",
+      "tags": ["Cyberpunk", "RPG", "Open World"],
+      "videoSources": { "mp4": "assets/placeholders/video.mp4", "hls": "https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8" }
+    },
+    {
+      "id": "stream-2",
+      "channelId": "chan-2",
+      "isLive": true,
+      "title": "Lo-fi beats to relax/study to",
+      "categoryId": "cat-3",
+      "viewers": 34890,
+      "thumbnailUrl": "assets/placeholders/stream-2.jpg",
+      "tags": ["Lofi", "Chill", "Study"],
+      "videoSources": { "mp4": "assets/placeholders/video.mp4", "hls": "https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8" }
+    },
+    {
+      "id": "stream-3",
+      "channelId": "chan-3",
+      "isLive": true,
+      "title": "Building this Twitch clone LIVE",
+      "categoryId": "cat-6",
+      "viewers": 8765,
+      "thumbnailUrl": "assets/placeholders/stream-3.jpg",
+      "tags": ["JavaScript", "Web Dev", "Coding"],
+      "videoSources": { "mp4": "assets/placeholders/video.mp4", "hls": "https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8" }
+    },
+    {
+      "id": "stream-4",
+      "channelId": "chan-4",
+      "isLive": true,
+      "title": "Digital painting commission work | Fantasy character",
+      "categoryId": "cat-4",
+      "viewers": 4321,
+      "thumbnailUrl": "assets/placeholders/stream-4.jpg",
+      "tags": ["Art", "Photoshop", "Creative"],
+      "videoSources": { "mp4": "assets/placeholders/video.mp4", "hls": "https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8" }
+    },
+    {
+      "id": "stream-5",
+      "channelId": "chan-5",
+      "isLive": true,
+      "title": "Radiant Rank Grind! | VALORANT",
+      "categoryId": "cat-5",
+      "viewers": 21098,
+      "thumbnailUrl": "assets/placeholders/stream-5.jpg",
+      "tags": ["VALORANT", "FPS", "Esports"],
+      "videoSources": { "mp4": "assets/placeholders/video.mp4", "hls": "https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8" }
+    },
+    {
+      "id": "stream-6",
+      "channelId": "chan-6",
+      "isLive": true,
+      "title": "Just chatting & Q&A with the community",
+      "categoryId": "cat-1",
+      "viewers": 15234,
+      "thumbnailUrl": "assets/placeholders/stream-6.jpg",
+      "tags": ["Community", "Q&A", "IRL"],
+      "videoSources": { "mp4": "assets/placeholders/video.mp4", "hls": "https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8" }
+    },
+    {
+      "id": "stream-7",
+      "channelId": "chan-7",
+      "isLive": false,
+      "title": "Offline Stream",
+      "categoryId": "cat-1",
+      "viewers": 0,
+      "thumbnailUrl": "assets/placeholders/stream-7.jpg",
+      "tags": [],
+      "videoSources": {}
+    }
+  ],
+  "chatSettings": {
+    "mockUsers": ["Alice", "Bob", "Charlie", "Dave", "Eve", "Frank", "Grace", "Heidi"],
+    "mockMessages": ["Pog!", "LOL", "This is amazing!", "What a play!", "I'm new here, hello!", "Can you play my favorite song?", "Nice stream!", "GGs"],
+    "mockColors": ["#FF5733", "#33FF57", "#3357FF", "#FF33A1", "#A133FF", "#33FFA1", "#FFC300", "#FF5733"]
+  }
+}
