@@ -1,0 +1,23 @@
+/**
+ * @file api.js
+ * @description A module for fetching data. In this project, it fetches from a local JSON file.
+ */
+
+export const API = {
+    /**
+     * Fetches the main application data from data.json.
+     * @returns {Promise<Object|null>} A promise that resolves to the parsed JSON data, or null on error.
+     */
+    async fetchData() {
+        try {
+            const response = await fetch('data.json');
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            return await response.json();
+        } catch (error) {
+            console.error("Could not fetch data:", error);
+            return null;
+        }
+    }
+};
