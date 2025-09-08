@@ -1,0 +1,481 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Watching... - Streamify</title>
+    <meta name="description" content="A lightweight Twitch-style clone built with vanilla HTML, CSS, and JavaScript.">
+    <link rel="icon" href="assets/logo.svg" type="image/svg+xml">
+
+    <style>
+        /* --- STYLING SYSTEM --- */
+        /* A utility-first approach with BEM-style components for a scalable and maintainable system. */
+
+        /* 1. CSS Variables (Design Tokens) */
+        :root {
+          /* Colors - Light Theme (Default) */
+          --bg-primary: #f1f2f3;
+          --bg-secondary: #ffffff;
+          --surface-primary: #e4e6e8;
+          --text-primary: #1c1c1e;
+          --text-secondary: #606067;
+          --accent-primary: #9146ff;
+          --accent-primary-hover: #772ce8;
+          --border-primary: #d1d1d6;
+          --live-indicator: #eb0400;
+          --white: #fff;
+          --black: #000;
+
+          /* Typography */
+          --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+          --font-size-xs: 0.75rem; /* 12px */
+          --font-size-sm: 0.875rem; /* 14px */
+          --font-size-base: 1rem; /* 16px */
+          --font-size-lg: 1.125rem; /* 18px */
+          --font-size-xl: 1.25rem; /* 20px */
+
+          /* Spacing (4px scale) */
+          --space-1: 0.25rem;
+          --space-2: 0.5rem;
+          --space-3: 0.75rem;
+          --space-4: 1rem;
+          --space-6: 1.5rem;
+          --space-8: 2rem;
+          --space-10: 2.5rem;
+
+          /* Layout */
+          --header-height: 60px;
+          --sidebar-width: 250px;
+          --channel-chat-width: 340px;
+
+          /* Others */
+          --border-radius-sm: 6px;
+          --border-radius-md: 10px;
+          --border-radius-lg: 16px;
+          --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.04);
+          --shadow-md: 0 4px 10px rgba(0, 0, 0, 0.08);
+          --shadow-lg: 0 10px 25px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Dark Theme Variables */
+        [data-theme='dark'] {
+          --bg-primary: #0e0e10;
+          --bg-secondary: #18181b;
+          --surface-primary: #2a2a2e;
+          --text-primary: #f0f0f1;
+          --text-secondary: #a0a0ab;
+          --border-primary: #3c3c43;
+        }
+
+        /* 2. Base & Reset */
+        *, *::before, *::after {
+          box-sizing: border-box;
+          margin: 0;
+          padding: 0;
+        }
+
+        html {
+          font-family: var(--font-sans);
+          background-color: var(--bg-primary);
+          color: var(--text-primary);
+          line-height: 1.6;
+          -webkit-font-smoothing: antialiased;
+          -moz-osx-font-smoothing: grayscale;
+        }
+
+        body {
+            min-height: 100vh;
+        }
+
+        a {
+          color: var(--accent-primary);
+          text-decoration: none;
+        }
+
+        a:hover {
+          color: var(--accent-primary-hover);
+          text-decoration: none;
+        }
+
+        img {
+          max-width: 100%;
+          display: block;
+        }
+
+        /* 3. Layouts */
+        .app-layout {
+          display: grid;
+          grid-template-columns: var(--sidebar-width) 1fr;
+          grid-template-rows: var(--header-height) 1fr;
+          grid-template-areas:
+            "header header"
+            "sidebar main";
+          height: 100vh;
+        }
+
+        .channel-layout {
+            display: grid;
+            grid-template-columns: 1fr var(--channel-chat-width);
+            grid-template-rows: var(--header-height) 1fr;
+            grid-template-areas: 
+                "header header"
+                "main chat";
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        /* Responsive Layouts */
+        @media (max-width: 1024px) {
+            .app-layout {
+                grid-template-columns: 1fr;
+                grid-template-areas: 
+                    "header"
+                    "main";
+            }
+            .sidebar { display: none; }
+            
+            .channel-layout {
+                grid-template-columns: 1fr;
+                grid-template-rows: auto auto 1fr;
+                grid-template-areas: 
+                    "header"
+                    "main"
+                    "chat";
+                overflow-y: auto;
+            }
+            .main-content-channel { min-height: auto; }
+        }
+
+        @media (max-width: 768px) {
+            :root {
+                --channel-chat-width: 100%;
+            }
+            .header__center { display: none; }
+            .logo-text { display: none; }
+        }
+
+        /* 4. Components */
+
+        /* --- Header --- */
+        .header {
+          grid-area: header;
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          padding: 0 var(--space-6);
+          background-color: var(--bg-secondary);
+          box-shadow: var(--shadow-sm);
+          z-index: 10;
+        }
+        .header__left, .header__center, .header__right {
+            display: flex;
+            align-items: center;
+            gap: var(--space-6);
+        }
+        .header__center { flex-grow: 1; justify-content: center; max-width: 500px; }
+        .header__logo { display: flex; align-items: center; gap: var(--space-3); font-weight: 700; color: var(--text-primary); }
+        .header__logo:hover { text-decoration: none; }
+        .logo-icon { width: 32px; height: 32px; }
+        .logo-text { font-size: var(--font-size-lg); }
+
+        /* Search Bar */
+        .search-bar { position: relative; width: 100%; }
+        .search-bar__icon { position: absolute; left: var(--space-4); top: 50%; transform: translateY(-50%); color: var(--text-secondary); pointer-events: none; }
+        .search-bar__input {
+            width: 100%;
+            padding: var(--space-3) var(--space-4) var(--space-3) 44px;
+            background-color: var(--surface-primary);
+            border: 1px solid transparent;
+            border-radius: var(--border-radius-md);
+            color: var(--text-primary);
+            transition: all 0.2s ease;
+        }
+        .search-bar__input:focus { 
+            background-color: var(--bg-secondary);
+            outline: none;
+            border-color: var(--accent-primary);
+            box-shadow: 0 0 0 3px rgba(145, 70, 255, 0.3);
+        }
+
+        /* Theme Toggle & Profile */
+        .icon-button { background: none; border: none; cursor: pointer; color: var(--text-secondary); padding: var(--space-2); border-radius: 50%; transition: background-color 0.2s, color 0.2s; }
+        .icon-button:hover { background-color: var(--surface-primary); color: var(--text-primary); }
+        [data-theme='light'] .theme-icon--moon { display: none; }
+        [data-theme='dark'] .theme-icon--sun { display: none; }
+        .profile-mock__avatar { width: 36px; height: 36px; border-radius: 50%; }
+
+        /* --- Sidebar --- */
+        .sidebar {
+          grid-area: sidebar;
+          background-color: var(--bg-secondary);
+          padding: var(--space-6) var(--space-4);
+          overflow-y: auto;
+        }
+        .sidebar__title { font-size: var(--font-size-sm); font-weight: 600; text-transform: uppercase; color: var(--text-secondary); margin-bottom: var(--space-4); padding: 0 var(--space-2); }
+        #followed-channels-list { display: flex; flex-direction: column; gap: var(--space-1); }
+        .sidebar-link {
+            display: flex;
+            align-items: center;
+            gap: var(--space-3);
+            padding: var(--space-2);
+            border-radius: var(--border-radius-md);
+            transition: background-color 0.2s;
+            color: var(--text-primary);
+        }
+        .sidebar-link:hover { background-color: var(--surface-primary); text-decoration: none; }
+        .sidebar-link__avatar { width: 32px; height: 32px; border-radius: 50%; }
+        .sidebar-link__info { flex-grow: 1; overflow: hidden; }
+        .sidebar-link__name { white-space: nowrap; text-overflow: ellipsis; overflow: hidden; display: block; font-weight: 500; }
+        .sidebar-link__status { display: flex; align-items: center; gap: var(--space-2); font-size: var(--font-size-sm); }
+        .status-indicator--live { width: 8px; height: 8px; background-color: var(--live-indicator); border-radius: 50%; }
+        .sidebar-link--offline .sidebar-link__offline-text { color: var(--text-secondary); font-size: var(--font-size-sm); }
+
+        /* --- Main Content --- */
+        .main-content, .main-content-channel {
+          grid-area: main;
+          overflow-y: auto;
+          padding: var(--space-8) var(--space-10);
+        }
+        .section-title { font-size: var(--font-size-xl); margin-bottom: var(--space-6); font-weight: 700; }
+
+        /* Category Rail */
+        .category-rail__chips { display: flex; gap: var(--space-3); overflow-x: auto; padding-bottom: var(--space-3); }
+        .chip {
+          display: inline-block;
+          padding: var(--space-2) var(--space-4);
+          background-color: var(--surface-primary);
+          border-radius: 999px;
+          font-size: var(--font-size-sm);
+          font-weight: 600;
+          white-space: nowrap;
+          cursor: pointer;
+          border: 1px solid transparent;
+          transition: all 0.2s;
+        }
+        .chip:hover { background-color: var(--border-primary); transform: translateY(-2px); }
+        .chip.active { background-color: var(--accent-primary); color: var(--white); border-color: var(--accent-primary); }
+
+        /* Stream Grid */
+        .stream-grid {
+          display: grid;
+          grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+          gap: var(--space-8);
+        }
+        .card {
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            border-radius: var(--border-radius-md);
+        }
+        .card:hover {
+            transform: scale(1.03);
+            box-shadow: var(--shadow-lg);
+            z-index: 5;
+        }
+        .card__thumbnail-wrapper { 
+            position: relative; 
+            aspect-ratio: 16 / 9; 
+            background-color: var(--surface-primary); 
+            border-radius: var(--border-radius-md); 
+            overflow: hidden; 
+            margin-bottom: var(--space-3);
+        }
+        .card__thumbnail { width: 100%; height: 100%; object-fit: cover; transition: transform 0.3s ease; }
+        .card:hover .card__thumbnail { transform: scale(1.05); }
+
+        .card__live-badge {
+            position: absolute;
+            top: var(--space-3);
+            left: var(--space-3);
+            background-color: var(--live-indicator);
+            color: var(--white);
+            padding: 3px var(--space-2);
+            border-radius: var(--border-radius-sm);
+            font-size: var(--font-size-xs);
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+        .card__viewers-badge {
+            position: absolute;
+            bottom: var(--space-3);
+            left: var(--space-3);
+            display: flex; align-items: center;
+            background-color: rgba(0,0,0,0.7);
+            color: var(--white);
+            padding: 3px var(--space-2);
+            border-radius: var(--border-radius-sm);
+            font-size: var(--font-size-xs);
+            font-weight: 500;
+        }
+        .card__viewers-icon { width: 14px; height: 14px; margin-right: var(--space-1); }
+        .card__info { display: flex; gap: var(--space-3); }
+        .card__avatar { width: 40px; height: 40px; border-radius: 50%; }
+        .card__text { display: flex; flex-direction: column; overflow: hidden; }
+        .card__title { font-size: var(--font-size-base); font-weight: 600; color: var(--text-primary); margin-bottom: 2px; white-space: nowrap; text-overflow: ellipsis; overflow: hidden; }
+        .card__channel, .card__category { font-size: var(--font-size-sm); color: var(--text-secondary); }
+
+        /* --- Channel Page --- */
+        .body.channel-page-body { overflow: hidden; }
+        .video-player-wrapper { background-color: var(--black); margin-bottom: var(--space-4); border-radius: var(--border-radius-md); overflow: hidden; }
+        .video-container { position: relative; width: 100%; aspect-ratio: 16/9; }
+        #video-player { width: 100%; height: 100%; }
+        .video-overlay { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; background-color: rgba(0,0,0,0.7); color: var(--white); }
+        .stream-info { display: flex; justify-content: space-between; align-items: flex-start; gap: var(--space-4); }
+        .stream-info__meta { display: flex; align-items: flex-start; gap: var(--space-4); }
+        .stream-info__avatar { width: 60px; height: 60px; border-radius: 50%; }
+        .stream-info__title { font-size: var(--font-size-xl); font-weight: 700; }
+        .stream-info__channel { color: var(--text-secondary); }
+        .stream-info__tags { display: flex; gap: var(--space-2); margin-top: var(--space-2); }
+        .stream-info__actions { display: flex; align-items: center; gap: var(--space-4); }
+        .stream-info__viewers { display: flex; align-items: center; gap: var(--space-2); color: var(--text-secondary); }
+
+        /* Chat Panel */
+        .chat-panel {
+          grid-area: chat;
+          display: flex;
+          flex-direction: column;
+          background-color: var(--bg-secondary);
+          border-left: 1px solid var(--border-primary);
+          height: 100%;
+        }
+        .chat-panel__header { padding: var(--space-4); text-align: center; border-bottom: 1px solid var(--border-primary); }
+        .chat-panel__messages { flex-grow: 1; overflow-y: auto; padding: var(--space-4); display: flex; flex-direction: column; gap: var(--space-3); }
+        .chat-message { display: inline; line-height: 1.5; font-size: var(--font-size-sm); }
+        .chat-message__author { font-weight: 700; margin-right: var(--space-2); }
+        .chat-message__content { word-break: break-word; }
+        .chat-panel__composer { display: flex; padding: var(--space-3); border-top: 1px solid var(--border-primary); gap: var(--space-3); }
+        .chat-composer__input {
+            flex-grow: 1;
+            padding: var(--space-2) var(--space-3);
+            background-color: var(--surface-primary);
+            border: 1px solid transparent;
+            border-radius: var(--border-radius-md);
+            color: var(--text-primary);
+        }
+        .chat-composer__input:focus { outline: 1px solid var(--accent-primary); border-color: var(--accent-primary); background-color: var(--bg-secondary); }
+
+        /* 5. Utility Classes */
+        .btn {
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          gap: var(--space-2);
+          padding: var(--space-2) var(--space-4);
+          border-radius: var(--border-radius-md);
+          font-weight: 600;
+          border: none;
+          cursor: pointer;
+          transition: all 0.2s;
+        }
+        .btn--primary { background-color: var(--accent-primary); color: var(--white); }
+        .btn--primary:hover { background-color: var(--accent-primary-hover); transform: translateY(-2px); }
+        .btn--secondary { background-color: var(--surface-primary); color: var(--text-primary); }
+        .btn--secondary:hover { background-color: var(--border-primary); }
+        .btn__icon { width: 18px; height: 18px; }
+
+        .skip-link {
+            position: absolute;
+            top: -100px;
+            left: 0;
+            background: var(--accent-primary);
+            color: white;
+            padding: var(--space-3);
+            z-index: 100;
+            transition: top 0.3s;
+        }
+        .skip-link:focus {
+            top: 0;
+        }
+        .empty-state { text-align: center; padding: var(--space-8); color: var(--text-secondary); }
+        .empty-state__icon { width: 48px; height: 48px; margin-bottom: var(--space-4); }
+    </style>
+
+    <!-- Feather Icons CDN -->
+    <script src="https://unpkg.com/feather-icons"></script>
+    <!-- HLS.js for HLS playback fallback -->
+    <script src="https://cdn.jsdelivr.net/npm/hls.js@latest" defer></script>
+    <!-- Channel Page Specific Logic -->
+    <script type="module" src="channel.js" defer></script>
+</head>
+<body class="channel-page-body">
+    <a href="#main-content" class="skip-link">Skip to main content</a>
+
+    <div class="channel-layout">
+        <!-- Header -->
+        <header class="header">
+             <div class="header__left">
+                <a href="/" class="header__logo" aria-label="Streamify Homepage">
+                    <img src="assets/logo.svg" alt="Streamify Logo" class="logo-icon">
+                    <span class="logo-text">Streamify</span>
+                </a>
+            </div>
+            <div class="header__center">
+                <!-- Search bar is less prominent on channel page -->
+            </div>
+            <div class="header__right">
+                <button id="theme-toggle" class="icon-button" aria-label="Toggle theme">
+                    <i data-feather="sun" class="theme-icon--sun"></i>
+                    <i data-feather="moon" class="theme-icon--moon"></i>
+                </button>
+                <div class="profile-mock">
+                    <img src="assets/placeholders/avatar-generic.png" alt="User avatar" class="profile-mock__avatar">
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Content: Player and Stream Info -->
+        <main class="main-content-channel" id="main-content">
+            <div class="video-player-wrapper">
+                <div id="video-container" class="video-container">
+                    <video id="video-player" controls autoplay muted playsinline></video>
+                    <div id="video-overlay" class="video-overlay" hidden>
+                        <p id="video-overlay-text"></p>
+                    </div>
+                </div>
+            </div>
+            <section class="stream-info" id="stream-info-container">
+                <!-- Stream info will be populated by JS -->
+                <div class="stream-info__meta">
+                    <img id="stream-avatar" src="" alt="Channel Avatar" class="stream-info__avatar">
+                    <div class="stream-info__text">
+                        <h1 id="stream-title" class="stream-info__title"></h1>
+                        <p id="stream-channel-name" class="stream-info__channel"></p>
+                        <div class="stream-info__tags">
+                            <a href="#" id="stream-category-link" class="chip"></a>
+                            <!-- More tags can be added here -->
+                        </div>
+                    </div>
+                </div>
+                <div class="stream-info__actions">
+                    <button id="follow-button" class="btn btn--primary">
+                        <i data-feather="heart" class="btn__icon"></i>
+                        <span id="follow-button-text">Follow</span>
+                    </button>
+                    <div class="stream-info__viewers">
+                         <i data-feather="user"></i>
+                         <span id="viewer-count">0</span>
+                    </div>
+                </div>
+            </section>
+        </main>
+        
+        <!-- Chat Panel -->
+        <aside class="chat-panel">
+            <div class="chat-panel__header">
+                <h2>Stream Chat</h2>
+            </div>
+            <div class="chat-panel__messages" id="chat-messages" role="log" aria-live="polite">
+                <!-- Messages will be injected by JS -->
+            </div>
+            <div class="chat-panel__composer">
+                <input type="text" id="chat-input" class="chat-composer__input" placeholder="Send a message" autocomplete="off">
+                <button id="send-chat-button" class="btn btn--primary chat-composer__send" aria-label="Send message">
+                    <i data-feather="send"></i>
+                </button>
+            </div>
+        </aside>
+    </div>
+
+</body>
+</html>
+
