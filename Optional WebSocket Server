@@ -1,0 +1,98 @@
+/**
+ * @file server.js
+ * @description Optional minimal WebSocket server for real-time chat.
+ * To run: `node server.js`
+ * Requires 'ws' package: `npm install ws`
+ */
+
+const WebSocket = require('ws');
+
+const wss = new WebSocket.Server({ port: 8080 });
+
+console.log('WebSocket server started on port 8080');
+
+// Simple in-memory store for clients per channel
+const channels = {};
+
+wss.on('connection', (ws, req) => {
+    // Expected URL format: ws://localhost:8080?channelId=some-channel-id
+    const urlParams = new URLSearchParams(req.url.slice(1));
+    const channelId = urlParams.get('channelId');
+
+    if (!channelId) {
+        console.log('Connection rejected: No channelId provided.');
+        ws.close(1008, 'Channel ID is required');
+        return;
+    }
+
+    // Add client to the channel
+    if (!channels[channelId]) {
+        channels[channelId] = new Set();
+    }
+    channels[channelId].add(ws);
+
+    console.log(`Client connected to channel: ${channelId}. Total clients: ${channels[channelId].size}`);
+    
+    // Broadcast a system message for new connection
+    const welcomeMessage = JSON.stringify({
+        type: 'system',
+        content: `A new user has joined the chat.`
+    });
+    broadcast(channelId, welcomeMessage, null);
+
+
+    ws.on('message', (message) => {
+        try {
+            const parsedMessage = JSON.parse(message);
+            
+            // Basic validation
+            if (!parsedMessage.content || !parsedMessage.author) {
+                return;
+            }
+            
+            // For this simple server, we trust the client's data.
+            // In a real app, author info would come from a session/token.
+            const broadcastMessage = JSON.stringify({
+                type: 'user',
+                ...parsedMessage
+            });
+            
+            console.log(`Message received on channel ${channelId}:`, parsedMessage.content);
+            broadcast(channelId, broadcastMessage, ws);
+
+        } catch (error) {
+            console.error('Failed to parse message or broadcast:', error);
+        }
+    });
+
+    ws.on('close', () => {
+        if (channels[channelId]) {
+            channels[channelId].delete(ws);
+            console.log(`Client disconnected from channel: ${channelId}. Total clients: ${channels[channelId].size}`);
+
+            if (channels[channelId].size === 0) {
+                delete channels[channelId];
+            }
+        }
+    });
+    
+    ws.on('error', (error) => {
+        console.error('WebSocket error:', error);
+    });
+});
+
+/**
+ * Broadcasts a message to all clients in a specific channel.
+ * @param {string} channelId - The ID of the channel to broadcast to.
+ * @param {string} message - The message (as a string) to send.
+ * @param {WebSocket} [exclude] - A WebSocket client to exclude from the broadcast.
+ */
+function broadcast(channelId, message, exclude) {
+    if (!channels[channelId]) return;
+    
+    for (const client of channels[channelId]) {
+        if (client !== exclude && client.readyState === WebSocket.OPEN) {
+            client.send(message);
+        }
+    }
+}
