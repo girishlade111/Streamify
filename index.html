@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Streamify | Interactive Project Overview</title>
+    <!-- Chosen Palette: "Warm Neutral & Muted Violet" - A professional, calm palette with a subtle accent for calls to action, inspired by the source material's theme but adapted for a more professional, report-like presentation. -->
+    <!-- Application Structure Plan: The SPA is designed as a thematic, single-page dashboard. This structure replaces the linear, top-to-bottom reading of the original README with an interactive, explorable experience. Key sections (Features, Demo, Architecture, Setup) are accessible via a sticky navigation, allowing users to jump to the content most relevant to them. This user-centric flow is superior for usability as it caters to different user goals (e.g., a developer wanting setup instructions vs. a manager wanting to see features). The highlight is an interactive, non-functional mock-up of the app, which provides a tangible feel for the project far more effectively than text alone. -->
+    <!-- Visualization & Content Choices: Report Info -> Goal -> Presentation -> Interaction -> Justification. 1. Features List -> Inform & Organize -> Grid of Cards with Icons -> Hover effects -> More scannable and visually engaging than a plain bulleted list. 2. Project Functionality -> Demonstrate -> Interactive UI Mock-up -> Click stream card to open modal -> Provides a "feel" for the app, making the project's purpose instantly clear. 3. Architectural Decisions -> Explain -> Two-column interactive list -> Click principle to see details -> Breaks down complex info into digestible, user-triggered chunks. 4. Setup Instructions -> Instruct -> Tabbed interface for different modes -> Click tabs to switch content -> Simplifies complex instructions by separating concerns and reducing cognitive load. 5. File Structure -> Organize -> Styled nested list -> Hover tooltips (simulated via title attribute) -> More intuitive and visually representative of a directory tree than plain text. No charts (Chart.js/Plotly) are used as the source report is purely textual and contains no quantitative data to visualize. -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        :root {
+            --bg-main: #F8F7F4; /* Warm white */
+            --bg-secondary: #FFFFFF;
+            --surface: #EFECE5;
+            --text-primary: #2C2C2C;
+            --text-secondary: #585858;
+            --accent: #6C5B7B; /* Muted Violet */
+            --accent-light: #C06C84;
+            --border-color: #DCD9D1;
+        }
+        body {
+            background-color: var(--bg-main);
+            color: var(--text-primary);
+            font-family: 'Inter', sans-serif;
+        }
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+        .active-nav {
+            color: var(--accent);
+            font-weight: 600;
+        }
+        .active-tab {
+             background-color: var(--accent);
+             color: white;
+        }
+        .code-block {
+            background-color: #2D2D2D;
+            color: #E0E0E0;
+            font-family: 'Courier New', Courier, monospace;
+        }
+    </style>
+</head>
+<body class="antialiased">
+
+    <!-- Header & Navigation -->
+    <header id="header" class="bg-white/80 backdrop-blur-lg sticky top-0 z-50 border-b border-[var(--border-color)]">
+        <nav class="container mx-auto px-6 py-4 flex justify-between items-center">
+            <h1 class="text-xl font-bold text-[var(--text-primary)]">Streamify Project</h1>
+            <ul class="hidden md:flex items-center space-x-8 text-sm font-medium text-[var(--text-secondary)]">
+                <li><a href="#features" class="hover:text-[var(--accent)] transition-colors">Features</a></li>
+                <li><a href="#demo" class="hover:text-[var(--accent)] transition-colors">Live Demo</a></li>
+                <li><a href="#architecture" class="hover:text-[var(--accent)] transition-colors">Architecture</a></li>
+                <li><a href="#setup" class="hover:text-[var(--accent)] transition-colors">Setup</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <!-- Main Content -->
+    <main>
+        <!-- Hero Section -->
+        <section id="home" class="py-20 md:py-32 bg-[var(--bg-secondary)]">
+            <div class="container mx-auto text-center px-6">
+                <h2 class="text-4xl md:text-6xl font-bold tracking-tight text-[var(--text-primary)]">A Modern Streaming Platform</h2>
+                <p class="mt-6 max-w-2xl mx-auto text-lg text-[var(--text-secondary)]">This is an interactive overview of the Streamify project, a lightweight Twitch-style clone built with vanilla HTML, CSS, and JavaScript to demonstrate core web development proficiency without heavy frameworks.</p>
+                <div class="mt-10 flex justify-center gap-4">
+                    <a href="#demo" class="bg-[var(--accent)] text-white font-semibold px-8 py-3 rounded-lg shadow-md hover:bg-opacity-90 transition-all">View Live Demo</a>
+                    <a href="#setup" class="bg-gray-200 text-[var(--text-secondary)] font-semibold px-8 py-3 rounded-lg hover:bg-gray-300 transition-all">Get Started</a>
+                </div>
+            </div>
+        </section>
+
+        <!-- Features Section -->
+        <section id="features" class="py-20">
+            <div class="container mx-auto px-6">
+                <div class="text-center mb-12">
+                    <h3 class="text-3xl font-bold">Project Features</h3>
+                    <p class="text-md text-[var(--text-secondary)] mt-2">Core functionalities built into the Streamify application.</p>
+                </div>
+                <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+                    <!-- Feature Cards -->
+                    <div class="bg-[var(--bg-secondary)] p-6 rounded-xl shadow-sm border border-transparent hover:border-[var(--border-color)] transition-all">
+                        <div class="text-2xl mb-3">🎨</div>
+                        <h4 class="font-bold text-lg mb-2">Responsive Design</h4>
+                        <p class="text-[var(--text-secondary)] text-sm">Mobile-first layout that adapts seamlessly to all screen sizes, from phones to desktops.</p>
+                    </div>
+                    <div class="bg-[var(--bg-secondary)] p-6 rounded-xl shadow-sm border border-transparent hover:border-[var(--border-color)] transition-all">
+                        <div class="text-2xl mb-3">🌗</div>
+                        <h4 class="font-bold text-lg mb-2">Dark/Light Theme</h4>
+                        <p class="text-[var(--text-secondary)] text-sm">Supports system preference and manual toggling, with the user's choice saved in `localStorage`.</p>
+                    </div>
+                    <div class="bg-[var(--bg-secondary)] p-6 rounded-xl shadow-sm border border-transparent hover:border-[var(--border-color)] transition-all">
+                        <div class="text-2xl mb-3">🔍</div>
+                        <h4 class="font-bold text-lg mb-2">Client-Side Search</h4>
+                        <p class="text-[var(--text-secondary)] text-sm">A debounced search input to instantly filter streams by title, channel name, or category.</p>
+                    </div>
+                    <div class="bg-[var(--bg-secondary)] p-6 rounded-xl shadow-sm border border-transparent hover:border-[var(--border-color)] transition-all">
+                        <div class="text-2xl mb-3">▶️</div>
+                        <h4 class="font-bold text-lg mb-2">HLS Video Playback</h4>
+                        <p class="text-[var(--text-secondary)] text-sm">Uses the standard `<video>` element with `hls.js` as a fallback for broad browser compatibility.</p>
+                    </div>
+                    <div class="bg-[var(--bg-secondary)] p-6 rounded-xl shadow-sm border border-transparent hover:border-[var(--border-color)] transition-all">
+                        <div class="text-2xl mb-3">❤️</div>
+                        <h4 class="font-bold text-lg mb-2">Follow System</h4>
+                        <p class="text-[var(--text-secondary)] text-sm">"Follow" and "unfollow" channels, with the state persisted in the browser's `localStorage`.</p>
+                    </div>
+                    <div class="bg-[var(--bg-secondary)] p-6 rounded-xl shadow-sm border border-transparent hover:border-[var(--border-color)] transition-all">
+                        <div class="text-2xl mb-3">💬</div>
+                        <h4 class="font-bold text-lg mb-2">Live Chat</h4>
+                        <p class="text-[var(--text-secondary)] text-sm">Features a mock mode for demo purposes and an optional real-time mode via WebSockets.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <!-- Live Demo Section -->
+        <section id="demo" class="py-20 bg-[var(--surface)]">
+            <div class="container mx-auto px-6">
+                <div class="text-center mb-12">
+                    <h3 class="text-3xl font-bold">Interactive Demo</h3>
+                    <p class="text-md text-[var(--text-secondary)] mt-2">A non-functional mock-up demonstrating the application's UI. Click a stream to see the channel view.</p>
+                </div>
+                <!-- Mini App UI -->
+                <div class="max-w-4xl mx-auto bg-white rounded-xl shadow-2xl border border-[var(--border-color)] overflow-hidden">
+                    <div class="p-4 border-b border-[var(--border-color)]">
+                        <h4 class="font-bold">Live Streams</h4>
+                    </div>
+                    <div class="p-6 grid grid-cols-2 md:grid-cols-3 gap-4">
+                        <!-- Stream Cards -->
+                        <div class="demo-card cursor-pointer group">
+                             <div class="aspect-video bg-gray-300 rounded-lg mb-2 overflow-hidden">
+                                <img src="https://placehold.co/600x400/772ce8/white?text=Stream+1" alt="Stream Thumbnail" class="w-full h-full object-cover group-hover:scale-105 transition-transform"/>
+                            </div>
+                            <h5 class="font-semibold text-sm truncate">Playing the latest hits!</h5>
+                            <p class="text-xs text-[var(--text-secondary)]">GamerPro</p>
+                        </div>
+                        <div class="demo-card cursor-pointer group">
+                            <div class="aspect-video bg-gray-300 rounded-lg mb-2 overflow-hidden">
+                                <img src="https://placehold.co/600x400/eb0400/white?text=Stream+2" alt="Stream Thumbnail" class="w-full h-full object-cover group-hover:scale-105 transition-transform"/>
+                            </div>
+                            <h5 class="font-semibold text-sm truncate">Speedrunning a classic RPG</h5>
+                            <p class="text-xs text-[var(--text-secondary)]">PixelQueen</p>
+                        </div>
+                         <div class="demo-card cursor-pointer group">
+                             <div class="aspect-video bg-gray-300 rounded-lg mb-2 overflow-hidden">
+                                <img src="https://placehold.co/600x400/1c1c1e/white?text=Stream+3" alt="Stream Thumbnail" class="w-full h-full object-cover group-hover:scale-105 transition-transform"/>
+                            </div>
+                            <h5 class="font-semibold text-sm truncate">Just Chatting with viewers</h5>
+                            <p class="text-xs text-[var(--text-secondary)]">TalksAlot</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Architecture Section -->
+        <section id="architecture" class="py-20">
+            <div class="container mx-auto px-6">
+                <div class="text-center mb-12">
+                    <h3 class="text-3xl font-bold">Architecture & Design</h3>
+                    <p class="text-md text-[var(--text-secondary)] mt-2">Key technical decisions and the project's structure.</p>
+                </div>
+                <div class="lg:grid lg:grid-cols-3 lg:gap-12">
+                    <!-- Principles -->
+                    <div class="lg:col-span-1 mb-8 lg:mb-0">
+                        <h4 class="font-bold text-lg mb-4">Core Principles</h4>
+                        <ul id="arch-principles" class="space-y-2">
+                            <li><button data-target="arch-vanilla" class="text-left w-full p-3 rounded-lg font-medium bg-[var(--surface)] text-[var(--accent)]">Vanilla First</button></li>
+                            <li><button data-target="arch-modular" class="text-left w-full p-3 rounded-lg font-medium hover:bg-[var(--surface)] transition-colors">Modular JavaScript</button></li>
+                            <li><button data-target="arch-state" class="text-left w-full p-3 rounded-lg font-medium hover:bg-[var(--surface)] transition-colors">Simple State Management</button></li>
+                            <li><button data-target="arch-css" class="text-left w-full p-3 rounded-lg font-medium hover:bg-[var(--surface)] transition-colors">CSS with Variables</button></li>
+                            <li><button data-target="arch-data" class="text-left w-full p-3 rounded-lg font-medium hover:bg-[var(--surface)] transition-colors">Data-Driven UI</button></li>
+                        </ul>
+                    </div>
+                    <!-- Details & File Structure -->
+                    <div class="lg:col-span-2">
+                        <div id="arch-details" class="bg-white p-6 rounded-xl border border-[var(--border-color)] min-h-[250px] mb-8">
+                            <!-- JS will populate this -->
+                        </div>
+                        <h4 class="font-bold text-lg mb-4">Project Structure</h4>
+                        <div class="code-block p-4 rounded-lg text-sm overflow-x-auto">
+                            <pre>
+/
+├── 📂 assets/
+├── 📂 modules/
+│   ├── 📜 api.js
+│   ├── 📜 chat.js
+│   └── 📜 ...
+├── 📜 index.html
+├── 📜 channel.html
+├── 📜 data.json
+└── 📜 server.js (Optional)
+                            </pre>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Setup Section -->
+        <section id="setup" class="py-20 bg-[var(--surface)]">
+            <div class="container mx-auto px-6">
+                <div class="text-center mb-12">
+                    <h3 class="text-3xl font-bold">How to Run</h3>
+                    <p class="text-md text-[var(--text-secondary)] mt-2">Follow these steps to get the project running on your local machine.</p>
+                </div>
+                <div class="max-w-3xl mx-auto">
+                    <!-- Tabs -->
+                    <div class="flex border-b border-[var(--border-color)] mb-6">
+                        <button class="setup-tab px-6 py-3 font-semibold text-lg" data-target="setup-mock">Mock Mode</button>
+                        <button class="setup-tab px-6 py-3 font-semibold text-lg text-[var(--text-secondary)]" data-target="setup-realtime">Realtime Mode</button>
+                    </div>
+                    <!-- Tab Content -->
+                    <div id="setup-content" class="text-left">
+                        <!-- JS will populate this -->
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+    
+    <!-- Footer -->
+    <footer class="py-6 border-t border-[var(--border-color)]">
+        <div class="container mx-auto text-center px-6">
+            <p class="text-sm text-[var(--text-secondary)]">Streamify Interactive Overview | Generated from Project README</p>
+        </div>
+    </footer>
+
+    <!-- Demo Modal -->
+    <div id="demo-modal" class="fixed inset-0 bg-black/70 z-50 flex items-center justify-center p-4 hidden">
+        <div id="demo-modal-content" class="bg-white rounded-xl shadow-2xl w-full max-w-4xl max-h-[90vh] flex flex-col transform scale-95 opacity-0 transition-all duration-300">
+            <!-- Modal Header -->
+            <div class="p-4 flex justify-between items-center border-b border-[var(--border-color)]">
+                <h3 class="font-bold">Channel View (Demo)</h3>
+                <button id="close-modal-btn" class="text-gray-500 hover:text-black">&times;</button>
+            </div>
+            <!-- Modal Body -->
+            <div class="flex-grow p-4 md:flex md:gap-4 overflow-y-auto">
+                <div class="md:w-2/3 mb-4 md:mb-0">
+                    <div class="aspect-video bg-black rounded-lg flex items-center justify-center">
+                       <p class="text-white">Video Player Placeholder</p>
+                    </div>
+                    <div class="mt-4">
+                        <h4 class="font-bold text-xl">Playing the latest hits!</h4>
+                        <p class="text-md text-[var(--accent)]">GamerPro</p>
+                    </div>
+                </div>
+                <div class="md:w-1/3 bg-gray-50 border border-[var(--border-color)] rounded-lg flex flex-col">
+                    <h5 class="p-2 font-semibold text-center border-b border-[var(--border-color)] text-sm">Stream Chat</h5>
+                    <div class="flex-grow p-2 space-y-2 overflow-y-auto text-sm">
+                        <p><strong>User123:</strong> This is awesome!</p>
+                        <p><strong>PixelQueen:</strong> Welcome to the stream!</p>
+                        <p><strong>Bot:</strong> Remember to be nice.</p>
+                        <p><strong>GamerPro:</strong> Thanks for tuning in everyone!</p>
+                    </div>
+                    <div class="p-2 border-t border-[var(--border-color)]">
+                        <input type="text" placeholder="Send a message (disabled)" class="w-full p-2 text-sm border rounded-md bg-gray-200" disabled />
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // --- DATA FOR DYNAMIC CONTENT ---
+            const archData = {
+                'arch-vanilla': {
+                    title: 'Vanilla First',
+                    content: 'The decision to avoid frameworks was deliberate to demonstrate proficiency with core web technologies. It results in a very small bundle size and fast load times, focusing on fundamentals over abstractions.'
+                },
+                'arch-modular': {
+                    title: 'Modular JavaScript',
+                    content: "Code is organized into modules to promote separation of concerns. For example, DOM manipulation is separate from API logic, making the codebase cleaner, easier to maintain, and scalable."
+                },
+                'arch-state': {
+                    title: 'Simple State Management',
+                    content: "Global state is managed in simple JavaScript objects. For a larger application, a more robust state management solution (like a Pub/Sub model) would be considered, but this approach is sufficient and lightweight for the project's scope."
+                },
+                'arch-css': {
+                    title: 'CSS with Variables',
+                    content: 'A comprehensive set of CSS variables (design tokens) makes theming and maintaining a consistent design system easy. The styling is a hybrid of BEM-style components and utility classes for flexibility.'
+                },
+                'arch-data': {
+                    title: 'Data-Driven UI',
+                    content: 'The UI is rendered dynamically from a mock `data.json` file. This simulates fetching data from a real API and makes it easy to add or change content without touching the HTML markup directly.'
+                }
+            };
+
+            const setupData = {
+                'setup-mock': `
+                    <h4 class="font-bold text-lg mb-4">Mode 1: Mock Mode (No Server Needed)</h4>
+                    <p class="text-[var(--text-secondary)] mb-4">This is the easiest way to see the front-end in action. The chat will be simulated.</p>
+                    <ol class="list-decimal list-inside space-y-4">
+                        <li>
+                            <strong>Clone the repository:</strong>
+                            <div class="code-block p-3 rounded-lg mt-2 text-sm">git clone https://github.com/your-username/streamify.git<br>cd streamify</div>
+                        </li>
+                        <li>
+                            <strong>Open index.html in your browser:</strong>
+                            <p class="text-sm mt-1">You can simply open the <code>index.html</code> file directly. However, if the video player shows a CORS error, run a simple local server:</p>
+                            <div class="code-block p-3 rounded-lg mt-2 text-sm">npx serve</div>
+                        </li>
+                    </ol>
+                `,
+                'setup-realtime': `
+                    <h4 class="font-bold text-lg mb-4">Mode 2: Realtime Chat Mode</h4>
+                    <p class="text-[var(--text-secondary)] mb-4">This mode enables the live chat feature by running a small Node.js WebSocket server.</p>
+                    <ol class="list-decimal list-inside space-y-4">
+                        <li>
+                            <strong>Prerequisites:</strong>
+                            <p class="text-sm mt-1">You must have Node.js installed on your machine.</p>
+                        </li>
+                        <li>
+                            <strong>Install dependencies:</strong>
+                             <div class="code-block p-3 rounded-lg mt-2 text-sm">npm install ws</div>
+                        </li>
+                        <li>
+                            <strong>Start the WebSocket server:</strong>
+                             <div class="code-block p-3 rounded-lg mt-2 text-sm">node server.js</div>
+                        </li>
+                         <li>
+                            <strong>Update the chat mode in <code>channel.js</code>:</strong>
+                             <div class="code-block p-3 rounded-lg mt-2 text-sm">const CHAT_MODE = 'websocket'; // Change from 'mock'</div>
+                        </li>
+                         <li>
+                            <strong>Run the front-end via a local server:</strong>
+                             <div class="code-block p-3 rounded-lg mt-2 text-sm">npx serve</div>
+                        </li>
+                    </ol>
+                `
+            };
+
+            // --- ARCHITECTURE SECTION LOGIC ---
+            const archPrinciples = document.getElementById('arch-principles');
+            const archDetailsContainer = document.getElementById('arch-details');
+
+            function updateArchDetails(targetId) {
+                const data = archData[targetId];
+                if (!data) return;
+                archDetailsContainer.innerHTML = `<h4 class="font-bold text-lg mb-2">${data.title}</h4><p class="text-[var(--text-secondary)]">${data.content}</p>`;
+                
+                archPrinciples.querySelectorAll('button').forEach(btn => {
+                    btn.classList.remove('bg-[var(--surface)]', 'text-[var(--accent)]');
+                    if (btn.dataset.target === targetId) {
+                        btn.classList.add('bg-[var(--surface)]', 'text-[var(--accent)]');
+                    }
+                });
+            }
+
+            archPrinciples.addEventListener('click', (e) => {
+                if (e.target.tagName === 'BUTTON') {
+                    updateArchDetails(e.target.dataset.target);
+                }
+            });
+            // Initial load
+            updateArchDetails('arch-vanilla');
+
+            // --- SETUP SECTION LOGIC ---
+            const setupTabsContainer = document.querySelector('.flex.border-b');
+            const setupContentContainer = document.getElementById('setup-content');
+
+            function updateSetupContent(targetId) {
+                setupContentContainer.innerHTML = setupData[targetId];
+                document.querySelectorAll('.setup-tab').forEach(tab => {
+                    tab.classList.remove('active-tab', 'text-[var(--accent)]');
+                    tab.classList.add('text-[var(--text-secondary)]');
+                    if (tab.dataset.target === targetId) {
+                        tab.classList.add('active-tab', 'text-[var(--accent)]');
+                         tab.classList.remove('text-[var(--text-secondary)]');
+                    }
+                });
+            }
+            
+            setupTabsContainer.addEventListener('click', e => {
+                if (e.target.classList.contains('setup-tab')) {
+                    updateSetupContent(e.target.dataset.target);
+                }
+            });
+            // Initial load
+            updateSetupContent('setup-mock');
+            document.querySelector('.setup-tab[data-target="setup-mock"]').classList.add('active-tab');
+            document.querySelector('.setup-tab[data-target="setup-mock"]').classList.remove('text-[var(--text-secondary)]');
+            
+            // --- DEMO MODAL LOGIC ---
+            const modal = document.getElementById('demo-modal');
+            const modalContent = document.getElementById('demo-modal-content');
+            const closeModalBtn = document.getElementById('close-modal-btn');
+            const demoCards = document.querySelectorAll('.demo-card');
+
+            function openModal() {
+                modal.classList.remove('hidden');
+                setTimeout(() => {
+                    modalContent.classList.remove('scale-95', 'opacity-0');
+                    modalContent.classList.add('scale-100', 'opacity-100');
+                }, 10);
+            }
+
+            function closeModal() {
+                modalContent.classList.add('scale-95', 'opacity-0');
+                modalContent.classList.remove('scale-100', 'opacity-100');
+                setTimeout(() => {
+                    modal.classList.add('hidden');
+                }, 300);
+            }
+
+            demoCards.forEach(card => card.addEventListener('click', openModal));
+            closeModalBtn.addEventListener('click', closeModal);
+            modal.addEventListener('click', (e) => {
+                if (e.target === modal) {
+                    closeModal();
+                }
+            });
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape' && !modal.classList.contains('hidden')) {
+                    closeModal();
+                }
+            });
+        });
+    </script>
+</body>
+</html>
+
