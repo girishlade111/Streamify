@@ -17,3 +17,11 @@ Update the chat mode:In the modules/chat.js file, change the CHAT_MODE constant 
 ├── 📜 data.json            # Mock data for channels and categories
 └── 📜 server.js (Optional) # Minimal Node.js WebSocket server
 ⚠️ LimitationsNo Backend/Database: All data is pulled from a static data.json file. State (like followed channels) is stored only in the user's browser.No Authentication: There is no user login or authentication system.Mock VODs: The video player uses a single sample video file for all streams for demonstration purposes.📄 LicenseThis project is licensed under the MIT License. See the LICENSE file for details.
+
+---
+
+## 👨‍💻 Built by Girish Lade
+
+**Streamify** is an open-source project by [Girish Lade](https://github.com/girishlade111).
+
+Check out more projects at [ladestack.in](https://ladestack.in).
